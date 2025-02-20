@@ -2,7 +2,8 @@
 
 echo "1) Instalar Postfix"
 echo "2) Desinstalar Postfix"
-echo "3) Instalar SquirrelMail (Ampliacion)"
+echo "3) Instalar SquirrelMail"
+echo "4) Ayuda"
 read -p "Seleccione una opción: " opcion
 
 if [ "$opcion" -eq 1 ]; then
@@ -50,4 +51,16 @@ elif [ "$opcion" -eq 3 ]; then
     echo "127.0.0.1 $dominio_web" | sudo tee -a /etc/hosts
 
     echo "SquirrelMail configurado. Accede en: http://$dominio_web/squirrelmail"
+
+elif [ "$opcion" -eq 4 ]; then
+    echo "Ayuda del script:"
+    echo "1) Instalar Postfix: Instala y configura el servicio de correo Postfix, permitiendo enviar correos desde el servidor."
+    echo "   - Se solicita un dominio para configurar el servicio."
+    echo "   - Reinicia Postfix tras la instalación."
+    echo "2) Desinstalar Postfix: Elimina completamente Postfix."
+    echo "3) Instalar SquirrelMail: Instala el cliente web de correo SquirrelMail."
+    echo "   - Se solicita un dominio para configurar el acceso al webmail."
+    echo "   - Se crea un VirtualHost en Apache para enlazar el dominio con SquirrelMail."
+    echo "   - Se reinicia Apache para aplicar los cambios."
+    echo "4) Ayuda: Muestra esta explicación detallada sobre cada opción del script."
 fi
