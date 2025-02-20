@@ -1,0 +1,50 @@
+#!/bin/bash
+instalar_docker(){
+echo "Viendo si docker está instalado"
+if ! command -v docker &> /dev/null; then
+        echo "Docker no está instalado."
+        echo "Espere un momento..."
+        sudo apt update
+        sudo apt install apt-transport-https ca-certificates cur>
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg >
+        sudo add-apt-repository "deb [arch=amd64] https://downlo>
+        sudo apt update
+        apt-cache policy docker -ce
+        sudo apt install docker -ce
+        echo "Docker ya se ha instalado"
+else
+        echo "Docker ya está instalado"
+fi
+}
+
+imagen_ubuntu(){
+if ! command -v docker &> /dev/null; then
+        echo "Docker no está instalado. Usa el parámetro -i para>
+fi
+echo "Descargando la imagen ubuntu en Docker"
+sudo docker pull ubuntu
+sudo docker run ubuntu
+}
+
+case "$1" in
+        -i)
+           instalar_docker
+        ;;
+        --ubuntu)
+           imagen_ubuntu
+        ;;
+
+        --help)
+           echo "ESte es el menu de opciones"
+           echo "Este script sirve para instalar un docker con i>
+           echo "SINTAXIS: $0 [-i | --ubuntu | --help]"
+           echo "PARAMETROS:"
+           echo "-i ----------> Instala Docker"
+           echo "--ubuntu ----> Descarga la imagen Ubuntu en Doc>
+           echo "--help ------> Muestra la ayuda del script"
+        ;;
+        *)
+           echo "Esa opción no es válida. Consulte la ayuda con >
+
+        ;;
+esac
