@@ -4,6 +4,8 @@ echo "1) Instalar Postfix"
 echo "2) Desinstalar Postfix"
 echo "3) Instalar SquirrelMail"
 echo "4) Ayuda"
+echo "5) Iniciar Postfix"
+echo "6) Detener Postfix"
 read -p "Seleccione una opción: " opcion
 
 if [ "$opcion" -eq 1 ]; then
@@ -63,4 +65,14 @@ elif [ "$opcion" -eq 4 ]; then
     echo "   - Se crea un VirtualHost en Apache para enlazar el dominio con SquirrelMail."
     echo "   - Se reinicia Apache para aplicar los cambios."
     echo "4) Ayuda: Muestra esta explicación detallada sobre cada opción del script."
+    echo "5) Iniciar Postfix: Activa el servicio de Postfix."
+    echo "6) Detener Postfix: Detiene el servicio de Postfix."
+
+elif [ "$opcion" -eq 5 ]; then
+    sudo systemctl start postfix
+    echo "Postfix iniciado"
+
+elif [ "$opcion" -eq 6 ]; then
+    sudo systemctl stop postfix
+    echo "Postfix detenido"
 fi
