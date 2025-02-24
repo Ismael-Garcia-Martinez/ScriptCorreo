@@ -23,7 +23,7 @@ if ! command -v docker &> /dev/null; then
 fi
 echo "Descargando la imagen ubuntu en Docker"
 sudo docker pull ubuntu
-sudo docker run ubuntu
+sudo docker run -it ubuntu
 }
 
 case "$1" in
