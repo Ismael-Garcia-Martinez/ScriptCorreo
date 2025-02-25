@@ -42,7 +42,7 @@ fi
         service postfix start &&
         bash"
 }
-ase "$1" in
+case "$1" in
         -i)
            instalar_docker
         ;;
