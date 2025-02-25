@@ -53,6 +53,36 @@ else
     echo "Error: No se pudo crear el playbook."
     exit 1
 fi
+
+cat > "$principal" <<EOL
+relayhost = {{ postfix_relayhost }}
+smtpd_relay_restrictions = permit_mynetworks permit>
+inet_interfaces = all
+proxy_interfaces = 0.0.0.0
+EOL
+
+if [ -f "$principal" ]; then
+    echo "Plantilla de configuración creada en '$pr>
+else
+    echo "Error: No se pudo crear la plantilla de c>
+    exit 1
+fi
+
+cat > "$inventario" <<EOL
+[servidores_correo]
+mi-servidor ansible_host=192.168.1.10 ansible_user=>
+EOL
+
+if [ -f "$inventario" ]; then
+    echo "Inventario creado en '$inventario'."
+else
+    echo "Error: No se pudo crear el archivo de inv>
+    exit 1
+fi
+
+echo "Playbook de instalación añadido en '$Directorio'."
+
+
  
 
 
