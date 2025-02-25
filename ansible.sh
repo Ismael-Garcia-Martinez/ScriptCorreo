@@ -10,15 +10,14 @@ mkdir -p "$configuracion"
 
 cat > "$archivo" <<EOL
 ---
-- name: Instalar y configurar Postfix como proxy SMTP
+- name: Instalar y configurar Postfix para correos locales
   hosts: local
   connection: local
   become: true
   vars:
-    postfix_relayhost: "[127.0.0.1]:25"
     myhostname: "localhost"
     mydomain: "local"
-    email_destino: "ismael@localhost"
+    usuario_destino: "pepe@localhost"  # Usa localhost en lugar de local.local
 
   tasks:
     - name: Detener y deshabilitar el servicio Postfix (si existe)
@@ -53,7 +52,7 @@ cat > "$archivo" <<EOL
         state: present
         update_cache: yes
 
-    - name: Configurar Postfix en modo proxy
+    - name: Configurar Postfix para correos locales
       template:
         src: configuracion/principal.cf.j2
         dest: /etc/postfix/main.cf
@@ -65,10 +64,10 @@ cat > "$archivo" <<EOL
         enabled: yes
         state: started
 
-    - name: Enviar correo de prueba
+    - name: Enviar correo de prueba a otro usuario local
       command: >
         echo "Este es un correo de prueba" |
-        mail -s "Prueba de Postfix" {{ email_destino }}
+        mail -s "Prueba de correo local" {{ usuario_destino }}
 
     - name: Verificar que Postfix está escuchando en el puerto 25
       wait_for:
@@ -88,7 +87,7 @@ mydomain = {{ mydomain }}
 myorigin = \$mydomain
 inet_interfaces = all
 mydestination = \$myhostname, localhost.\$mydomain, \$mydomain
-relayhost = {{ postfix_relayhost }}
+relayhost =
 mynetworks = 127.0.0.0/8
 smtpd_relay_restrictions = permit_mynetworks reject_unauth_destination
 smtp_use_tls = no
@@ -111,3 +110,5 @@ fi
 echo "Playbook de instalación de Postfix generado en '$Directorio'."
 echo "Ejecuta el playbook con el siguiente comando:"
 echo "ansible-playbook -i $inventario $archivo"
+echo "Para enviar un correo usa lo siguiente: "
+echo "'Este es un correo de prueba' | mail -s 'Prueba de correo local' pepe@localhost"
