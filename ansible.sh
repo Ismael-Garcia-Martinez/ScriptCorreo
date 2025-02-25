@@ -16,7 +16,8 @@ fi
 cat > "$archivo" <<EOL
 ---
 - name: Instalar y configurar Postfix como proxy SMTP
-  hosts: servidores_correo
+  hosts: localhost  # Cambiado a localhost
+  connection: local  # Conexión local
   become: true
   vars:
     postfix_relayhost: "[127.0.0.1]:25"
@@ -72,8 +73,8 @@ else
 fi
 
 cat > "$inventario" <<EOL
-[servidores_correo]
-mi-servidor ansible_host=192.168.1.10 ansible_user=usuario
+[localhost]
+localhost ansible_connection=local  # Configuración para ejecutar en local
 EOL
 
 if [ -f "$inventario" ]; then
