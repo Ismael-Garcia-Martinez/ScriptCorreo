@@ -12,6 +12,7 @@ else
     echo "Error: No se pudo crear el directorio '$Director>
     exit 1
 fi
+mkdir -p $configuracion
 cat > "$archivo" <<EOL
 ---
 - name: Instalar y configurar Postfix
