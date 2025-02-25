@@ -1,70 +1,72 @@
 #!/bin/bash
-instalar_docker(){
-echo "Viendo si docker está instalado"
-if ! command -v docker &> /dev/null; then
-        echo "Docker no está instalado."
-        echo "Espere un momento..."
+
+instalar_docker() {
+    echo "Verificando si Docker está instalado..."
+    if ! command -v docker &> /dev/null; then
+        echo "Docker no está instalado. Instalándolo ahora..."
         sudo apt update
-        sudo apt install apt-transport-https ca-certificates curl software-properties-common
+        sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
         curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
         sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
         sudo apt update
         apt-cache policy docker-ce
-        sudo apt install docker-ce
-        echo "Docker ya se ha instalado"
-else
-        echo "Docker ya está instalado"
-fi
+        sudo apt install -y docker-ce
+        echo "Docker se ha instalado correctamente."
+    else
+        echo "Docker ya está instalado."
+    fi
 }
 
-imagen_ubuntu(){
-if ! command -v docker &> /dev/null; then
-        echo "Docker no está instalado. Usa el parámetro -i para instalarlo"
-fi
-echo "Descargando la imagen ubuntu en Docker"
-sudo docker pull ubuntu
-sudo docker run -it ubuntu
+imagen_ubuntu() {
+    if ! command -v docker &> /dev/null; then
+        echo "Docker no está instalado. Usa el parámetro -i para instalarlo."
+        exit 1
+    fi
+    echo "Descargando la imagen de Ubuntu en Docker..."
+    sudo docker pull ubuntu
+    sudo docker run -it ubuntu
 }
-instalar_mail(){
-if ! command -v docker &> /dev/null; then
-        echo "Docker no está instalado. Usa el parametro -i para instalarlo. "
-fi
-        echo "Creando un contenedor Ubuntu con Postfix"
 
-        sudo docker run -it --name ubuntu_mail ubuntu bash -c "
-        echo 'Actualizando repositrios e instlando Postfix...'
-         && apt update &&
-        DEBIAN_FRONTERD=noninteractive apt install -y postfix mailutils &&
+instalar_mail() {
+    if ! command -v docker &> /dev/null; then
+        echo "Docker no está instalado. Usa el parámetro -i para instalarlo."
+        exit 1
+    fi
+
+    echo "Creando un contenedor Ubuntu con Postfix..."
+    sudo docker run -it --name ubuntu_mail ubuntu bash -c "
+        echo 'Actualizando repositorios e instalando Postfix...' &&
+        apt update &&
+        DEBIAN_FRONTEND=noninteractive apt install -y postfix mailutils &&
         echo 'Configurando Postfix...' &&
         postconf -e 'inet_interfaces = all' &&
         postconf -e 'mydestination = localhost' &&
-        echo 'Postfix instalado y configurado' &&
+        echo 'Postfix instalado y configurado.' &&
         service postfix start &&
-        bash"
+        exec bash"
 }
+
 case "$1" in
-        -i)
-           instalar_docker
-        ;;
-        --ubuntu)
-           imagen_ubuntu
-        ;;
-        --mail)
-          instalar_mail
-        ;;
-
-        --help)
-           echo "ESte es el menu de opciones"
-           echo "Este script sirve para instalar un docker con imagen ubuntu"
-           echo "SINTAXIS: $0 [-i | --ubuntu | --help]"
-           echo "PARAMETROS:"
-           echo "-i ----------> Instala Docker"
-           echo "--ubuntu ----> Descarga la imagen Ubuntu en Docker"
-           echo "--mail ------> Instala Postfix y lo configura dentro de un contenedor"
-           echo "--help ------> Muestra la ayuda del script"
-        ;;
-        *)
-           echo "Esa opción no es válida. Consulte la ayuda con el parametro --help"
-
-        ;;
+    -i)
+        instalar_docker
+    ;;
+    --ubuntu)
+        imagen_ubuntu
+    ;;
+    --mail)
+        instalar_mail
+    ;;
+    --help)
+        echo "Este es el menú de opciones:"
+        echo "Este script sirve para instalar Docker y configurar contenedores con Ubuntu y Postfix."
+        echo "SINTAXIS: $0 [-i | --ubuntu | --mail | --help]"
+        echo "PARÁMETROS:"
+        echo "-i ----------> Instala Docker"
+        echo "--ubuntu ----> Descarga la imagen Ubuntu en Docker"
+        echo "--mail ------> Instala Postfix y lo configura dentro de un contenedor"
+        echo "--help ------> Muestra la ayuda del script"
+    ;;
+    *)
+        echo "Opción no válida. Consulte la ayuda con el parámetro --help."
+    ;;
 esac
