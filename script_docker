@@ -1,72 +1,155 @@
 #!/bin/bash
 
+# Archivo para almacenar el ID del contenedor
+ID_CONTENEDOR_FILE="./id_contenedor.txt"
+
+# Función para instalar Docker
 instalar_docker() {
-    echo "Verificando si Docker está instalado..."
-    if ! command -v docker &> /dev/null; then
-        echo "Docker no está instalado. Instalándolo ahora..."
+    echo "Comprobando si Docker está instalado..."
+    if ! sudo command -v docker &> /dev/null; then
+        echo "Docker no está instalado. Instalando Docker..."
+
+        # Actualizar e instalar dependencias necesarias
         sudo apt update
         sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
+
+        # Agregar la clave GPG oficial de Docker
         curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+
+        # Agregar el repositorio de Docker
         sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+
+        # Actualizar la lista de paquetes e instalar Docker
         sudo apt update
         apt-cache policy docker-ce
         sudo apt install -y docker-ce
-        echo "Docker se ha instalado correctamente."
+
+        echo "¡Docker ha sido instalado exitosamente!"
     else
         echo "Docker ya está instalado."
     fi
 }
 
+# Función para descargar y ejecutar la imagen de Ubuntu en Docker
 imagen_ubuntu() {
-    if ! command -v docker &> /dev/null; then
-        echo "Docker no está instalado. Usa el parámetro -i para instalarlo."
-        exit 1
-    fi
-    echo "Descargando la imagen de Ubuntu en Docker..."
+    echo "Descargando la imagen de Ubuntu desde Docker Hub..."
     sudo docker pull ubuntu
-    sudo docker run -it ubuntu
+
+    echo "Iniciando el contenedor de Ubuntu..."
+    id_contenedor=$(sudo docker run -d -it ubuntu)
+
+    # Guardar el ID del contenedor en un archivo
+    echo "$id_contenedor" > "$ID_CONTENEDOR_FILE"
+
+    echo "Contenedor Ubuntu iniciado con ID: $id_contenedor"
+
+    # Abrir el contenedor Ubuntu automáticamente
+    sudo docker exec -it "$id_contenedor" bash
 }
 
+# Función para instalar mailutils en un contenedor Ubuntu
 instalar_mail() {
-    if ! command -v docker &> /dev/null; then
-        echo "Docker no está instalado. Usa el parámetro -i para instalarlo."
-        exit 1
+    # Leer el ID del contenedor desde el archivo
+    id_contenedor=$(cat "$ID_CONTENEDOR_FILE")
+
+    if [ -z "$id_contenedor" ]; then
+        echo "No se ha proporcionado un ID de contenedor. Primero ejecuta --ubuntu para crear el contenedor."
+        return 1
     fi
 
-    echo "Creando un contenedor Ubuntu con Postfix..."
-    sudo docker run -it --name ubuntu_mail ubuntu bash -c "
-        echo 'Actualizando repositorios e instalando Postfix...' &&
-        apt update &&
-        DEBIAN_FRONTEND=noninteractive apt install -y postfix mailutils &&
-        echo 'Configurando Postfix...' &&
-        postconf -e 'inet_interfaces = all' &&
-        postconf -e 'mydestination = localhost' &&
-        echo 'Postfix instalado y configurado.' &&
-        service postfix start &&
-        exec bash"
+    echo "Instalando mailutils en el contenedor Ubuntu con ID: $id_contenedor..."
+
+    # Instalar mailutils dentro del contenedor
+    sudo docker exec -it "$id_contenedor" apt update
+    sudo docker exec -it "$id_contenedor" apt install -y mailutils
+
+    echo "mailutils ha sido instalado dentro del contenedor."
+
+    # Configurar el correo para enviar usando Gmail (SMTP)
+    echo "Configurando Gmail para enviar correos desde el contenedor..."
+    sudo docker exec -it "$id_contenedor" bash -c 'echo "set smtp=smtp://smtp.gmail.com:587" >> ~/.muttrc'
+    sudo docker exec -it "$id_contenedor" bash -c 'echo "set smtp_auth=login" >> ~/.muttrc'
+    sudo docker exec -it "$id_contenedor" bash -c 'echo "set smtp_user=tu_email@gmail.com" >> ~/.muttrc'  # Reemplaza con tu correo
+    sudo docker exec -it "$id_contenedor" bash -c 'echo "set smtp_pass=tu_contraseña" >> ~/.muttrc'  # Reemplaza con tu contraseña de aplicación
+
+    # Enviar un correo de prueba
+    echo "Enviando correo de prueba a tu_email@gmail.com..."
+    sudo docker exec -it "$id_contenedor" bash -c "echo 'Este es un correo de prueba enviado desde Docker' | mail -s 'Correo de prueba' tu_email@gmail.com"
+
+    echo "Correo enviado."
 }
 
+# Función para enviar un correo a un destinatario especificado
+enviar_correo() {
+    # Obtener el destinatario desde el segundo argumento
+    destinatario="$2"
+
+    if [ -z "$destinatario" ]; then
+        echo "Error: No se ha especificado un destinatario."
+        return 1
+    fi
+
+    # Leer el ID del contenedor desde el archivo
+    id_contenedor=$(cat "$ID_CONTENEDOR_FILE")
+
+    if [ -z "$id_contenedor" ]; then
+        echo "No se ha proporcionado un ID de contenedor. Primero ejecuta --ubuntu para crear el contenedor."
+        return 1
+    fi
+
+    echo "Enviando correo al destinatario: $destinatario..."
+
+    # Instalar mailutils si no está instalado
+    sudo docker exec -it "$id_contenedor" apt update
+    sudo docker exec -it "$id_contenedor" apt install -y mailutils
+
+    # Configurar el correo para enviar usando Gmail (SMTP)
+    sudo docker exec -it "$id_contenedor" bash -c 'echo "set smtp=smtp://smtp.gmail.com:587" >> ~/.muttrc'
+    sudo docker exec -it "$id_contenedor" bash -c 'echo "set smtp_auth=login" >> ~/.muttrc'
+    sudo docker exec -it "$id_contenedor" bash -c 'echo "set smtp_user=tu_email@gmail.com" >> ~/.muttrc'  # Reemplaza con tu correo
+    sudo docker exec -it "$id_contenedor" bash -c 'echo "set smtp_pass=tu_contraseña" >> ~/.muttrc'  # Reemplaza con tu contraseña de aplicación
+
+    # Enviar el correo al destinatario especificado
+    echo "Este es un correo de prueba enviado desde Docker" | sudo docker exec -i "$id_contenedor" mail -s "Correo de prueba" "$destinatario"
+
+    echo "Correo enviado a $destinatario."
+}
+
+# Función para mostrar la ayuda
+mostrar_ayuda() {
+    echo "Este es el menú de opciones."
+    echo "Este script permite instalar Docker, descargar y ejecutar una imagen de Ubuntu en Docker, e instalar mailutils dentro del contenedor Ubuntu."
+    echo "SINTAXIS: $0 [-i | --ubuntu | --mail <destinatario> | --help]"
+    echo "PARÁMETROS:"
+    echo "-i  ----------> Instala Docker"
+    echo "--ubuntu -----> Descarga y ejecuta la imagen Ubuntu en Docker"
+    echo "--mail -------> Instala mailutils, configura Gmail y envía un correo a <destinatario>"
+    echo "--help -------> Muestra la ayuda del script"
+}
+
+# Estructura principal de opciones
 case "$1" in
     -i)
         instalar_docker
-    ;;
+        ;;
+    
     --ubuntu)
         imagen_ubuntu
-    ;;
+        ;;
+    
     --mail)
-        instalar_mail
-    ;;
+        if [ -z "$2" ]; then
+            echo "Error: Debes proporcionar un destinatario para enviar el correo."
+            exit 1
+        fi
+        enviar_correo "$@"
+        ;;
+    
     --help)
-        echo "Este es el menú de opciones:"
-        echo "Este script sirve para instalar Docker y configurar contenedores con Ubuntu y Postfix."
-        echo "SINTAXIS: $0 [-i | --ubuntu | --mail | --help]"
-        echo "PARÁMETROS:"
-        echo "-i ----------> Instala Docker"
-        echo "--ubuntu ----> Descarga la imagen Ubuntu en Docker"
-        echo "--mail ------> Instala Postfix y lo configura dentro de un contenedor"
-        echo "--help ------> Muestra la ayuda del script"
-    ;;
+        mostrar_ayuda
+        ;;
+    
     *)
-        echo "Opción no válida. Consulte la ayuda con el parámetro --help."
-    ;;
+        echo "Opción no válida. Usa --help para ver las opciones válidas."
+        ;;
 esac
