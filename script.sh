@@ -1,14 +1,24 @@
 #!/bin/bash
 
-echo "1) Instalar Postfix"
-echo "2) Desinstalar Postfix"
-echo "3) Instalar SquirrelMail"
-echo "4) Ayuda"
-echo "5) Iniciar Postfix"
-echo "6) Detener Postfix"
+echo "1) Datos de red de tu equipo"
+echo "2) Estado del servicio"
+echo "3) Instalar Postfix"
+echo "4) Desinstalar Postfix"
+echo "5) Instalar SquirrelMail"
+echo "6) Ayuda"
+echo "7) Iniciar Postfix"
+echo "8) Detener Postfix"
 read -p "Seleccione una opción: " opcion
 
 if [ "$opcion" -eq 1 ]; then
+    ip a
+    echo "Datos de red mostrados"
+
+elif [ "$opcion" -eq 2 ]; then
+    systemctl status postfix
+    echo "Estado del servicio mostrado"
+
+elif [ "$opcion" -eq 3 ]; then
 	sudo apt update && sudo apt install -y postfix mailutils libsasl2-2 ca-certificates libsasl2-modules
 
 	echo "¿Cómo quieres que se llame tu dominio? (ejemplo.com)"
@@ -22,13 +32,13 @@ if [ "$opcion" -eq 1 ]; then
 
 	echo "Postfix instalado y configurado"
 
-elif [ "$opcion" -eq 2 ]; then
+elif [ "$opcion" -eq 4 ]; then
     sudo systemctl stop postfix
     sudo apt remove --purge -y postfix mailutils libsasl2-2 ca-certificates libsasl2-modules
     sudo apt autoremove -y
     echo "Postfix desinstalado"
 
-elif [ "$opcion" -eq 3 ]; then
+elif [ "$opcion" -eq 5 ]; then
     sudo apt update && sudo apt install -y squirrelmail apache2 php libapache2-mod-php
     echo "SquirrelMail instalado"
 
@@ -54,25 +64,23 @@ elif [ "$opcion" -eq 3 ]; then
 
     echo "SquirrelMail configurado. Accede en: http://$dominio_web/squirrelmail"
 
-elif [ "$opcion" -eq 4 ]; then
+elif [ "$opcion" -eq 6 ]; then
     echo "Ayuda del script:"
-    echo "1) Instalar Postfix: Instala y configura el servicio de correo Postfix, permitiendo enviar correos desde el servidor."
-    echo "   - Se solicita un dominio para configurar el servicio."
-    echo "   - Reinicia Postfix tras la instalación."
-    echo "2) Desinstalar Postfix: Elimina completamente Postfix."
-    echo "3) Instalar SquirrelMail: Instala el cliente web de correo SquirrelMail."
-    echo "   - Se solicita un dominio para configurar el acceso al webmail."
-    echo "   - Se crea un VirtualHost en Apache para enlazar el dominio con SquirrelMail."
-    echo "   - Se reinicia Apache para aplicar los cambios."
-    echo "4) Ayuda: Muestra esta explicación detallada sobre cada opción del script."
-    echo "5) Iniciar Postfix: Activa el servicio de Postfix."
-    echo "6) Detener Postfix: Detiene el servicio de Postfix."
+    echo "1) Datos de red de tu equipo: Muestra la configuración de red."
+    echo "2) Estado del servicio: Muestra el estado actual del servicio Postfix."
+    echo "3) Instalar Postfix: Instala y configura el servicio de correo Postfix."
+    echo "4) Desinstalar Postfix: Elimina completamente Postfix."
+    echo "5) Instalar SquirrelMail: Instala el cliente web de correo SquirrelMail."
+    echo "6) Ayuda: Muestra esta explicación detallada sobre cada opción del script."
+    echo "7) Iniciar Postfix: Activa el servicio de Postfix."
+    echo "8) Detener Postfix: Detiene el servicio de Postfix."
 
-elif [ "$opcion" -eq 5 ]; then
+elif [ "$opcion" -eq 7 ]; then
     sudo systemctl start postfix
     echo "Postfix iniciado"
 
-elif [ "$opcion" -eq 6 ]; then
+elif [ "$opcion" -eq 8 ]; then
     sudo systemctl stop postfix
     echo "Postfix detenido"
 fi
+
