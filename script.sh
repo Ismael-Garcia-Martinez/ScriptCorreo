@@ -5,9 +5,10 @@ echo "2) Estado del servicio"
 echo "3) Instalar Postfix"
 echo "4) Desinstalar Postfix"
 echo "5) Instalar SquirrelMail"
-echo "6) Ayuda"
-echo "7) Iniciar Postfix"
-echo "8) Detener Postfix"
+echo "6) Desinstalar SquirrelMail"
+echo "7) Ayuda"
+echo "8) Iniciar Postfix"
+echo "9) Detener Postfix"
 read -p "Seleccione una opción: " opcion
 
 if [ "$opcion" -eq 1 ]; then
@@ -65,22 +66,30 @@ elif [ "$opcion" -eq 5 ]; then
     echo "SquirrelMail configurado. Accede en: http://$dominio_web/squirrelmail"
 
 elif [ "$opcion" -eq 6 ]; then
+    sudo systemctl stop apache2
+    sudo apt remove --purge -y squirrelmail apache2 php libapache2-mod-php
+    sudo rm -rf /etc/apache2/sites-available/squirrelmail.conf
+    sudo rm -rf /var/www/html/squirrelmail
+    sudo systemctl reload apache2
+    echo "SquirrelMail desinstalado"
+
+elif [ "$opcion" -eq 7 ]; then
     echo "Ayuda del script:"
     echo "1) Datos de red de tu equipo: Muestra la configuración de red."
     echo "2) Estado del servicio: Muestra el estado actual del servicio Postfix."
     echo "3) Instalar Postfix: Instala y configura el servicio de correo Postfix."
     echo "4) Desinstalar Postfix: Elimina completamente Postfix."
     echo "5) Instalar SquirrelMail: Instala el cliente web de correo SquirrelMail."
-    echo "6) Ayuda: Muestra esta explicación detallada sobre cada opción del script."
-    echo "7) Iniciar Postfix: Activa el servicio de Postfix."
-    echo "8) Detener Postfix: Detiene el servicio de Postfix."
+    echo "6) Desinstalar SquirrelMail: Elimina completamente SquirrelMail."
+    echo "7) Ayuda: Muestra esta explicación detallada sobre cada opción del script."
+    echo "8) Iniciar Postfix: Activa el servicio de Postfix."
+    echo "9) Detener Postfix: Detiene el servicio de Postfix."
 
-elif [ "$opcion" -eq 7 ]; then
+elif [ "$opcion" -eq 8 ]; then
     sudo systemctl start postfix
     echo "Postfix iniciado"
 
-elif [ "$opcion" -eq 8 ]; then
+elif [ "$opcion" -eq 9 ]; then
     sudo systemctl stop postfix
     echo "Postfix detenido"
 fi
-
