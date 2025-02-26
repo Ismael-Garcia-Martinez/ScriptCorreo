@@ -17,7 +17,7 @@ cat > "$archivo" <<EOL
   vars:
     myhostname: "localhost"
     mydomain: "local"
-    usuario_destino: "pepe@localhost"  # Usa localhost en lugar de local.local
+    usuario_destino: "pepe@localhost"  
 
   tasks:
     - name: Detener y deshabilitar el servicio Postfix (si existe)
