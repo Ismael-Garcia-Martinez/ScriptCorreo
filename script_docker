@@ -69,11 +69,11 @@ enviar_correo() {
 mostrar_ayuda() {
     echo "Este es el menú de opciones."
     echo "Este script permite instalar Docker, descargar y ejecutar una imagen de Ubuntu en Docker, e instalar mailutils dentro del contenedor Ubuntu."
-    echo "SINTAXIS: $0 [-i | --ubuntu | --mail <destinatario> | --help]"
+    echo "SINTAXIS: $0 [-i | --ubuntu | --mail | --help]"
     echo "PARÁMETROS:"
     echo "-i  ----------> Instala Docker"
     echo "--ubuntu -----> Descarga y ejecuta la imagen Ubuntu en Docker"
-    echo "--mail -------> Instala mailutils, configura Gmail y envía un correo a <destinatario>"
+    echo "--mail -------> Instala mailutils y envía un correo"
     echo "--help -------> Muestra la ayuda del script"
 }
 
