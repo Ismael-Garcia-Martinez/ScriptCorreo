@@ -40,25 +40,6 @@ imagen_ubuntu() {
     sudo docker exec -it "$id_contenedor" bash
 }
 
-# Función para instalar mailutils en un contenedor Ubuntu
-instalar_mail() {
-    # Leer el ID del contenedor desde el archivo
-    id_contenedor=$(cat "$ID_CONTENEDOR_FILE")
-
-    if [ -z "$id_contenedor" ]; then
-        echo "No se ha proporcionado un ID de contenedor. Primero ejecuta --ubuntu para crear el contenedor."
-        return 1
-    fi
-
-    echo "Instalando mailutils en el contenedor Ubuntu con ID: $id_contenedor..."
-
-    # Instalar mailutils dentro del contenedor
-    sudo docker exec -it "$id_contenedor" apt update
-    sudo docker exec -it "$id_contenedor" apt install -y mailutils
-
-    echo "mailutils ha sido instalado dentro del contenedor."
-}
-
 # Función para enviar un correo a un destinatario especificado
 enviar_correo() {
     read -p "Ingrese el destinatario del correo: " destinatario
@@ -107,10 +88,6 @@ case "$1" in
         ;;
     
     --mail)
-        if [ -z "$2" ]; then
-            echo "Error: Debes proporcionar un destinatario para enviar el correo."
-            exit 1
-        fi
         enviar_correo "$@"
         ;;
     
