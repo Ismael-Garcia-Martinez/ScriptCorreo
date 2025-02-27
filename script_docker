@@ -1,25 +1,19 @@
 #!/bin/bash
 
-# Archivo para almacenar el ID del contenedor
 ID_CONTENEDOR_FILE="./id_contenedor.txt"
 
-# Función para instalar Docker
 instalar_docker() {
     echo "Comprobando si Docker está instalado..."
     if ! sudo command -v docker &> /dev/null; then
         echo "Docker no está instalado. Instalando Docker..."
 
-        # Actualizar e instalar dependencias necesarias
         sudo apt update
         sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
 
-        # Agregar la clave GPG oficial de Docker
         curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 
-        # Agregar el repositorio de Docker
         sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
 
-        # Actualizar la lista de paquetes e instalar Docker
         sudo apt update
         apt-cache policy docker-ce
         sudo apt install -y docker-ce
@@ -30,7 +24,6 @@ instalar_docker() {
     fi
 }
 
-# Función para descargar y ejecutar la imagen de Ubuntu en Docker
 imagen_ubuntu() {
     echo "Descargando la imagen de Ubuntu desde Docker Hub..."
     sudo docker pull ubuntu
