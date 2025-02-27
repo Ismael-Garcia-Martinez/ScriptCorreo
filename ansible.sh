@@ -107,8 +107,34 @@ else
     echo "Permisos de sudo sin contraseña agregados para $USER."
 fi
 
+echo "Sincronizando la hora del sistema..."
+sudo timedatectl set-ntp true
+sudo systemctl restart systemd-timesyncd
+
+echo "Verificando la hora del sistema..."
+timedatectl status
+
+echo "Instalando ntpdate para sincronización manual de la hora..."
+sudo apt install -y ntpdate
+sudo ntpdate pool.ntp.org
+
+echo "Actualizando la caché de APT..."
+sudo apt update
+
+echo "Resolviendo el problema de la clave de APT obsoleta..."
+if sudo apt-key list | grep -q "docker"; then
+    echo "Migrando la clave de Docker al nuevo formato..."
+    KEY_ID=$(sudo apt-key list | grep -B 1 "docker" | head -n 1 | awk '{print $2}')
+    sudo apt-key export "$KEY_ID" | sudo gpg --dearmour -o /etc/apt/trusted.gpg.d/docker.gpg
+    sudo apt-key del "$KEY_ID"
+    echo "Clave de Docker migrada correctamente."
+else
+    echo "No se encontró la clave de Docker en el formato antiguo."
+fi
+
 echo "Playbook de instalación de Postfix generado en '$Directorio'."
 echo "Ejecuta el playbook con el siguiente comando:"
 echo "ansible-playbook -i $inventario $archivo"
 echo "Para enviar un correo usa lo siguiente: "
 echo "'Este es un correo de prueba' | mail -s 'Prueba de correo local' pepe@localhost"
+echo "Haz un cat de /var/mail/<usuario>"
