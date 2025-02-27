@@ -57,19 +57,6 @@ instalar_mail() {
     sudo docker exec -it "$id_contenedor" apt install -y mailutils
 
     echo "mailutils ha sido instalado dentro del contenedor."
-
-    # Configurar el correo para enviar usando Gmail (SMTP)
-    echo "Configurando Gmail para enviar correos desde el contenedor..."
-    sudo docker exec -it "$id_contenedor" bash -c 'echo "set smtp=smtp://smtp.gmail.com:587" >> ~/.muttrc'
-    sudo docker exec -it "$id_contenedor" bash -c 'echo "set smtp_auth=login" >> ~/.muttrc'
-    sudo docker exec -it "$id_contenedor" bash -c 'echo "set smtp_user=tu_email@gmail.com" >> ~/.muttrc'  # Reemplaza con tu correo
-    sudo docker exec -it "$id_contenedor" bash -c 'echo "set smtp_pass=tu_contraseña" >> ~/.muttrc'  # Reemplaza con tu contraseña de aplicación
-
-    # Enviar un correo de prueba
-    echo "Enviando correo de prueba a tu_email@gmail.com..."
-    sudo docker exec -it "$id_contenedor" bash -c "echo 'Este es un correo de prueba enviado desde Docker' | mail -s 'Correo de prueba' tu_email@gmail.com"
-
-    echo "Correo enviado."
 }
 
 # Función para enviar un correo a un destinatario especificado
