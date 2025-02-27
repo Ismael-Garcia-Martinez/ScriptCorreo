@@ -11,4 +11,5 @@ Hemos dividido el trabajo en 3 partes:
 
 
 
-***Por ultimo hay un documento correo.docx donde documentamos un poco el funcionamiento***
+***Para ejecutar este scripta hay que descargarse 4 script (menu.sh, script.sh, script_docker y ejecucion.sh)***
+***Se ejecuta el script ejecucion.sh que te da a elegir que sript deseas ejecutar***
