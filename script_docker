@@ -74,37 +74,26 @@ instalar_mail() {
 
 # Función para enviar un correo a un destinatario especificado
 enviar_correo() {
-    # Obtener el destinatario desde el segundo argumento
-    destinatario="$2"
-
-    if [ -z "$destinatario" ]; then
-        echo "Error: No se ha especificado un destinatario."
+    read -p "Ingrese el destinatario del correo: " destinatario
+    read -p "Ingrese el asunto del correo: " asunto
+    echo "Ingrese el mensaje del correo. Presione Ctrl+D para finalizar:"
+    cuerpo=$(cat)
+    
+    if [ -z "$destinatario" ] || [ -z "$asunto" ] || [ -z "$cuerpo" ]; then
+        echo "Error: Se requiere destinatario, asunto y mensaje para enviar el correo."
         return 1
     fi
-
-    # Leer el ID del contenedor desde el archivo
+    
     id_contenedor=$(cat "$ID_CONTENEDOR_FILE")
-
     if [ -z "$id_contenedor" ]; then
         echo "No se ha proporcionado un ID de contenedor. Primero ejecuta --ubuntu para crear el contenedor."
         return 1
     fi
-
-    echo "Enviando correo al destinatario: $destinatario..."
-
-    # Instalar mailutils si no está instalado
+    
+    echo "Enviando correo a $destinatario..."
     sudo docker exec -it "$id_contenedor" apt update
     sudo docker exec -it "$id_contenedor" apt install -y mailutils
-
-    # Configurar el correo para enviar usando Gmail (SMTP)
-    sudo docker exec -it "$id_contenedor" bash -c 'echo "set smtp=smtp://smtp.gmail.com:587" >> ~/.muttrc'
-    sudo docker exec -it "$id_contenedor" bash -c 'echo "set smtp_auth=login" >> ~/.muttrc'
-    sudo docker exec -it "$id_contenedor" bash -c 'echo "set smtp_user=tu_email@gmail.com" >> ~/.muttrc'  # Reemplaza con tu correo
-    sudo docker exec -it "$id_contenedor" bash -c 'echo "set smtp_pass=tu_contraseña" >> ~/.muttrc'  # Reemplaza con tu contraseña de aplicación
-
-    # Enviar el correo al destinatario especificado
-    echo "Este es un correo de prueba enviado desde Docker" | sudo docker exec -i "$id_contenedor" mail -s "Correo de prueba" "$destinatario"
-
+    echo "$cuerpo" | sudo docker exec -i "$id_contenedor" mail -s "$asunto" "$destinatario"
     echo "Correo enviado a $destinatario."
 }
 
